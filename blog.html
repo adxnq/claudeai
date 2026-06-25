@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Блог об уходе за растениями — Зелёный Дом</title>
+  <meta name="description" content="Полезные статьи об уходе за комнатными растениями: полив, освещение, подборки для новичков.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <nav class="breadcrumbs"><a href="index.html">Главная</a> / <span>Блог</span></nav>
+  </div>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="section-head" style="margin-bottom:36px;">
+        <span class="eyebrow">Зелёный блог</span>
+        <h1>Учимся ухаживать за растениями</h1>
+        <p>Простые советы, проверенные нашими агрономами, — чтобы ваши растения были здоровы и красивы.</p>
+      </div>
+      <div class="grid" id="blogGrid" style="grid-template-columns:repeat(3,1fr);"></div>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    document.getElementById("blogGrid").innerHTML = ARTICLES.map(a => `
+      <a href="article.html?id=${a.id}" class="article-card">
+        <div class="article-card__media">${imgTag(a.cover, a.title)}</div>
+        <div class="article-card__body">
+          <span class="article-card__tag">${a.tag}</span>
+          <h3>${a.title}</h3>
+          <span class="article-card__date">${a.date}</span>
+          <p>${a.excerpt}</p>
+          <span class="article-card__more">Читать статью →</span>
+        </div>
+      </a>`).join("");
+  </script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Оформление заказа — Зелёный Дом</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="index.html">Главная</a> / <a href="cart.html">Корзина</a> / <span>Оформление</span>
+    </nav>
+  </div>
+
+  <section class="section section--tight">
+    <div class="container">
+      <h1 style="margin-bottom:24px;">Оформление заказа</h1>
+      <div id="checkoutMount"></div>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    const FREE_DELIVERY = 3000;
+    const DELIVERY_COST = 350;
+
+    const items = cartItems();
+    const mount = document.getElementById("checkoutMount");
+
+    if (items.length === 0) {
+      mount.innerHTML = `<div class="notice"><div class="notice__emoji">🛒</div>
+        <h3>Корзина пуста</h3><p>Добавьте растения, чтобы оформить заказ.</p>
+        <a href="catalog.html" class="btn btn--primary" style="margin-top:16px;">В каталог</a></div>`;
+    } else {
+      const subtotal = cartSubtotal();
+      const delivery = subtotal >= FREE_DELIVERY ? 0 : DELIVERY_COST;
+      const total = subtotal + delivery;
+
+      mount.innerHTML = `
+      <form class="cart-layout" id="orderForm" novalidate>
+        <div>
+          <h3 style="margin-bottom:16px;">1. Контактные данные</h3>
+          <div class="form-row">
+            <div class="field">
+              <label>Имя и фамилия *</label>
+              <input type="text" name="name" placeholder="Анна Иванова">
+              <div class="field__err">Укажите имя</div>
+            </div>
+            <div class="field">
+              <label>Телефон *</label>
+              <input type="tel" name="phone" placeholder="+7 900 000-00-00">
+              <div class="field__err">Укажите корректный телефон</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>E-mail *</label>
+            <input type="email" name="email" placeholder="anna@example.com">
+            <div class="field__err">Укажите корректный e-mail</div>
+          </div>
+
+          <h3 style="margin:26px 0 16px;">2. Доставка</h3>
+          <label class="radio-card">
+            <input type="radio" name="delivery" value="courier" checked>
+            <div><b>Курьером по городу</b><span>Завтра, с 10:00 до 22:00 · ${formatPrice(DELIVERY_COST)} (бесплатно от ${formatPrice(FREE_DELIVERY)})</span></div>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="delivery" value="pickup">
+            <div><b>Самовывоз из оранжереи</b><span>ул. Цветочная, 12 · сегодня · бесплатно</span></div>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="delivery" value="post">
+            <div><b>Почтой по России</b><span>3–7 дней · рассчитывается по тарифу</span></div>
+          </label>
+
+          <div class="field" id="addressField">
+            <label>Адрес доставки *</label>
+            <input type="text" name="address" placeholder="Город, улица, дом, квартира">
+            <div class="field__err">Укажите адрес доставки</div>
+          </div>
+
+          <h3 style="margin:26px 0 16px;">3. Оплата</h3>
+          <label class="radio-card">
+            <input type="radio" name="pay" value="card" checked>
+            <div><b>Картой онлайн</b><span>Безопасная оплата при оформлении</span></div>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="pay" value="cash">
+            <div><b>При получении</b><span>Наличными или картой курьеру</span></div>
+          </label>
+
+          <div class="field" style="margin-top:20px;">
+            <label>Комментарий к заказу</label>
+            <textarea name="comment" placeholder="Например: позвонить за час до доставки"></textarea>
+          </div>
+        </div>
+
+        <aside class="summary">
+          <h3>Ваш заказ</h3>
+          <div style="max-height:230px; overflow:auto; margin-bottom:12px;">
+            ${items.map(it => `<div class="summary__row"><span>${it.name} × ${it.qty}</span><span>${formatPrice(it.price * it.qty)}</span></div>`).join("")}
+          </div>
+          <div class="summary__row"><span>Доставка</span><span>${delivery === 0 ? "Бесплатно" : formatPrice(delivery)}</span></div>
+          <div class="summary__row summary__row--total"><span>Итого</span><span>${formatPrice(total)}</span></div>
+          <button type="submit" class="btn btn--primary btn--block btn--lg" style="margin-top:16px;">Подтвердить заказ</button>
+          <p style="font-size:.8rem;color:var(--muted);margin-top:12px;text-align:center;">Нажимая кнопку, вы соглашаетесь с условиями обработки данных.</p>
+        </aside>
+      </form>`;
+
+      const form = document.getElementById("orderForm");
+
+      // Адрес скрывается при самовывозе
+      form.querySelectorAll('[name="delivery"]').forEach(r => {
+        r.onchange = () => {
+          document.getElementById("addressField").style.display =
+            form.delivery.value === "pickup" ? "none" : "block";
+        };
+      });
+
+      function setError(name, on) {
+        const input = form.querySelector(`[name="${name}"]`);
+        if (input) input.closest(".field").classList.toggle("field--error", on);
+      }
+
+      form.onsubmit = e => {
+        e.preventDefault();
+        let ok = true;
+        const v = n => form.querySelector(`[name="${n}"]`).value.trim();
+
+        if (v("name").length < 2) { setError("name", true); ok = false; } else setError("name", false);
+        if (!/^[\d\s+()-]{10,}$/.test(v("phone"))) { setError("phone", true); ok = false; } else setError("phone", false);
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("email"))) { setError("email", true); ok = false; } else setError("email", false);
+
+        const needsAddress = form.delivery.value !== "pickup";
+        if (needsAddress && v("address").length < 5) { setError("address", true); ok = false; } else setError("address", false);
+
+        if (!ok) { toast("Проверьте поля формы ✋"); return; }
+
+        // Успех
+        const orderNo = Math.floor(100000 + Math.random() * 900000);
+        localStorage.removeItem("greenhouse_cart_v1");
+        updateCartCount();
+        document.getElementById("checkoutMount").innerHTML = `
+          <div class="notice" style="background:var(--green-50);border-radius:24px;">
+            <div class="notice__emoji">🎉</div>
+            <h2>Заказ №${orderNo} оформлен!</h2>
+            <p style="max-width:440px;margin:10px auto 0;">Спасибо, ${v("name").split(" ")[0]}! Мы отправили подтверждение на ${v("email")} и скоро свяжемся с вами по телефону для уточнения деталей доставки.</p>
+            <div style="display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap;">
+              <a href="catalog.html" class="btn btn--primary">Продолжить покупки</a>
+              <a href="index.html" class="btn btn--ghost">На главную</a>
+            </div>
+          </div>`;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+    }
+  </script>
+</body>
+</html>

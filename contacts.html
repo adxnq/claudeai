@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Контакты — Зелёный Дом</title>
+  <meta name="description" content="Контакты магазина Зелёный Дом: адрес оранжереи, телефон, режим работы, форма обратной связи.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <nav class="breadcrumbs"><a href="index.html">Главная</a> / <span>Контакты</span></nav>
+  </div>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="section-head" style="margin-bottom:36px;">
+        <span class="eyebrow">На связи</span>
+        <h1>Контакты</h1>
+        <p>Поможем выбрать растение, ответим на вопросы по заказу и уходу.</p>
+      </div>
+
+      <div class="contacts-layout">
+        <!-- Левая колонка: контакты -->
+        <div>
+          <ul class="contact-list">
+            <li><div class="ci">📍</div><div><span>Адрес оранжереи</span><b>г. Москва, ул. Цветочная, 12</b></div></li>
+            <li><div class="ci">📞</div><div><span>Телефон</span><b><a href="tel:+74951234567">+7 (495) 123-45-67</a></b></div></li>
+            <li><div class="ci">✉️</div><div><span>E-mail</span><b><a href="mailto:hello@greenhouse.ru">hello@greenhouse.ru</a></b></div></li>
+            <li id="delivery"><div class="ci">🕐</div><div><span>Режим работы</span><b>Ежедневно, 10:00 – 21:00</b></div></li>
+            <li><div class="ci">🚚</div><div><span>Доставка и оплата</span><b>По Москве — от 350 ₽ (бесплатно от 3 000 ₽), по России — почтой</b></div></li>
+          </ul>
+          <div class="map-embed">
+            <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=37.60%2C55.74%2C37.64%2C55.76&layer=mapnik" title="Карта" loading="lazy"></iframe>
+          </div>
+        </div>
+
+        <!-- Правая колонка: форма -->
+        <div>
+          <h3 style="margin-bottom:16px;">Напишите нам</h3>
+          <form id="contactForm" novalidate>
+            <div class="field">
+              <label>Ваше имя *</label>
+              <input type="text" name="name" placeholder="Как к вам обращаться">
+              <div class="field__err">Укажите имя</div>
+            </div>
+            <div class="field">
+              <label>E-mail *</label>
+              <input type="email" name="email" placeholder="you@example.com">
+              <div class="field__err">Укажите корректный e-mail</div>
+            </div>
+            <div class="field">
+              <label>Тема</label>
+              <select name="topic">
+                <option>Вопрос по заказу</option>
+                <option>Подбор растения</option>
+                <option>Уход за растением</option>
+                <option>Сотрудничество</option>
+                <option>Другое</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Сообщение *</label>
+              <textarea name="message" placeholder="Расскажите, чем мы можем помочь"></textarea>
+              <div class="field__err">Напишите сообщение</div>
+            </div>
+            <button type="submit" class="btn btn--primary btn--lg btn--block">Отправить сообщение</button>
+          </form>
+          <div id="formDone"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    const form = document.getElementById("contactForm");
+    function setError(name, on) {
+      form.querySelector(`[name="${name}"]`).closest(".field").classList.toggle("field--error", on);
+    }
+    form.onsubmit = e => {
+      e.preventDefault();
+      let ok = true;
+      const v = n => form.querySelector(`[name="${n}"]`).value.trim();
+      if (v("name").length < 2) { setError("name", true); ok = false; } else setError("name", false);
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("email"))) { setError("email", true); ok = false; } else setError("email", false);
+      if (v("message").length < 5) { setError("message", true); ok = false; } else setError("message", false);
+      if (!ok) { toast("Проверьте поля формы ✋"); return; }
+
+      const name = v("name").split(" ")[0];
+      form.style.display = "none";
+      document.getElementById("formDone").innerHTML = `
+        <div class="notice" style="background:var(--green-50);border-radius:20px;">
+          <div class="notice__emoji">✅</div>
+          <h3>Сообщение отправлено!</h3>
+          <p>Спасибо, ${name}! Мы ответим вам в течение рабочего дня.</p>
+        </div>`;
+      toast("Сообщение отправлено 🌿");
+    };
+  </script>
+</body>
+</html>

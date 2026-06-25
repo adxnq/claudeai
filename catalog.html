@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Каталог растений — Зелёный Дом</title>
+  <meta name="description" content="Каталог комнатных растений: монстеры, фикусы, суккуленты, неприхотливые и цветущие растения. Фильтры по свету, поливу и категориям.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="index.html">Главная</a> / <span>Каталог</span>
+    </nav>
+  </div>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="section-head" style="margin-bottom:28px;">
+        <h1>Каталог растений</h1>
+        <p>Найдите растение под свой свет, ритм жизни и интерьер.</p>
+      </div>
+
+      <!-- Фильтр по категориям -->
+      <div class="chips" id="catChips" style="margin-bottom:22px;"></div>
+
+      <!-- Доп. фильтры -->
+      <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:30px;">
+        <label style="display:flex; align-items:center; gap:8px; font-size:.92rem; color:var(--muted); cursor:pointer;">
+          <input type="checkbox" id="petFilter" style="accent-color:var(--green-600); width:18px; height:18px;">
+          🐾 Безопасны для питомцев
+        </label>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:.9rem; color:var(--muted);">Сортировка:</span>
+          <select id="sortSelect" style="padding:9px 12px; border:1.5px solid var(--line); border-radius:10px; font-family:inherit;">
+            <option value="popular">По популярности</option>
+            <option value="cheap">Сначала дешёвые</option>
+            <option value="expensive">Сначала дорогие</option>
+            <option value="name">По названию</option>
+          </select>
+        </div>
+      </div>
+
+      <p id="resultCount" style="color:var(--muted); margin-bottom:18px; font-size:.92rem;"></p>
+      <div class="grid" id="catalogGrid"></div>
+      <div id="emptyState"></div>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    let activeCat = qs("cat") || "all";
+    let petOnly = false;
+    let sortBy = "popular";
+
+    function renderChips() {
+      document.getElementById("catChips").innerHTML = CATEGORIES.map(c =>
+        `<button class="chip ${c.id === activeCat ? "is-active" : ""}" data-cat="${c.id}">${c.name}</button>`
+      ).join("");
+      document.querySelectorAll("#catChips .chip").forEach(ch => {
+        ch.onclick = () => { activeCat = ch.dataset.cat; renderChips(); render(); };
+      });
+    }
+
+    function render() {
+      let list = PLANTS.filter(p =>
+        (activeCat === "all" || p.category.includes(activeCat)) &&
+        (!petOnly || p.pet)
+      );
+      if (sortBy === "cheap") list.sort((a, b) => a.price - b.price);
+      else if (sortBy === "expensive") list.sort((a, b) => b.price - a.price);
+      else if (sortBy === "name") list.sort((a, b) => a.name.localeCompare(b.name, "ru"));
+
+      const grid = document.getElementById("catalogGrid");
+      const empty = document.getElementById("emptyState");
+      document.getElementById("resultCount").textContent =
+        `Найдено растений: ${list.length}`;
+
+      if (list.length === 0) {
+        grid.innerHTML = "";
+        empty.innerHTML = `<div class="notice"><div class="notice__emoji">🌵</div>
+          <h3>Ничего не найдено</h3><p>Попробуйте сбросить фильтры.</p></div>`;
+      } else {
+        empty.innerHTML = "";
+        grid.innerHTML = list.map(plantCard).join("");
+      }
+    }
+
+    document.getElementById("petFilter").onchange = e => { petOnly = e.target.checked; render(); };
+    document.getElementById("sortSelect").onchange = e => { sortBy = e.target.value; render(); };
+
+    renderChips();
+    render();
+  </script>
+</body>
+</html>

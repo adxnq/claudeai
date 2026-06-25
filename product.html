@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Растение — Зелёный Дом</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <nav class="breadcrumbs" id="crumbs">
+      <a href="index.html">Главная</a> / <a href="catalog.html">Каталог</a> / <span id="crumbName">Растение</span>
+    </nav>
+  </div>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div id="productMount"></div>
+    </div>
+  </section>
+
+  <!-- Похожие -->
+  <section class="section section--tight">
+    <div class="container">
+      <div class="section-head" style="margin-bottom:28px;">
+        <span class="eyebrow">Вам понравится</span>
+        <h2>Похожие растения</h2>
+      </div>
+      <div class="grid" id="relatedGrid"></div>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    const id = qs("id");
+    const p = getPlant(id);
+    const mount = document.getElementById("productMount");
+
+    if (!p) {
+      mount.innerHTML = `<div class="notice"><div class="notice__emoji">🤔</div>
+        <h3>Растение не найдено</h3>
+        <p>Возможно, оно уже нашло свой дом. Загляните в каталог.</p>
+        <a href="catalog.html" class="btn btn--primary" style="margin-top:16px;">В каталог</a></div>`;
+    } else {
+      document.title = `${p.name} — Зелёный Дом`;
+      document.getElementById("crumbName").textContent = p.name;
+
+      const oldPrice = p.oldPrice ? `<s>${formatPrice(p.oldPrice)}</s>` : "";
+      const badge = p.badge ? `<span class="card__badge" style="position:static;display:inline-block;margin-bottom:10px;">${p.badge}</span>` : "";
+      const petTag = p.pet
+        ? `<span class="tag">🐾 Безопасно для питомцев</span>`
+        : `<span class="tag">⚠️ Беречь от питомцев</span>`;
+
+      mount.innerHTML = `
+      <div class="product">
+        <div class="product__media">${imgTag(p.img, p.name)}</div>
+        <div class="product__info">
+          ${badge}
+          <h1>${p.name}</h1>
+          <div class="product__latin">${p.latin}</div>
+          <div class="product__price"><b>${formatPrice(p.price)}</b> ${oldPrice}</div>
+          <p class="product__desc">${p.desc}</p>
+
+          <div class="specs">
+            <div class="spec"><span>Освещение</span><b>☀️ ${p.light}</b></div>
+            <div class="spec"><span>Полив</span><b>💧 ${p.water}</b></div>
+            <div class="spec"><span>Высота</span><b>📏 ${p.height}</b></div>
+            <div class="spec"><span>Категория</span><b>🌿 ${p.category.map(c => CATEGORIES.find(x=>x.id===c)?.name).filter(Boolean)[0]}</b></div>
+          </div>
+
+          <div class="product__buy">
+            <div class="qty">
+              <button type="button" id="qMinus">−</button>
+              <input type="text" id="qVal" value="1" readonly>
+              <button type="button" id="qPlus">+</button>
+            </div>
+            <button class="btn btn--primary btn--lg" id="addBtn">В корзину · <span id="liveTotal">${formatPrice(p.price)}</span></button>
+          </div>
+          <div class="product__tags">
+            ${petTag}
+            <span class="tag">🚚 Доставка 1–3 дня</span>
+            <span class="tag">💚 Гарантия 14 дней</span>
+          </div>
+        </div>
+      </div>`;
+
+      let qty = 1;
+      const qVal = document.getElementById("qVal");
+      const liveTotal = document.getElementById("liveTotal");
+      const sync = () => { qVal.value = qty; liveTotal.textContent = formatPrice(p.price * qty); };
+      document.getElementById("qMinus").onclick = () => { if (qty > 1) { qty--; sync(); } };
+      document.getElementById("qPlus").onclick = () => { if (qty < 99) { qty++; sync(); } };
+      document.getElementById("addBtn").onclick = () => addToCart(p.id, qty);
+
+      // Похожие — из тех же категорий
+      const related = PLANTS.filter(x =>
+        x.id !== p.id && x.category.some(c => p.category.includes(c))
+      ).slice(0, 4);
+      const relList = related.length ? related : PLANTS.filter(x => x.id !== p.id).slice(0, 4);
+      document.getElementById("relatedGrid").innerHTML = relList.map(plantCard).join("");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Статья — Зелёный Дом</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <nav class="breadcrumbs"><a href="index.html">Главная</a> / <a href="blog.html">Блог</a> / <span id="crumb">Статья</span></nav>
+  </div>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div id="postMount" class="post"></div>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="section-head" style="margin-bottom:28px;"><h2>Читайте также</h2></div>
+      <div class="grid" id="moreGrid" style="grid-template-columns:repeat(3,1fr);"></div>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    const a = getArticle(qs("id"));
+    const mount = document.getElementById("postMount");
+
+    if (!a) {
+      mount.innerHTML = `<div class="notice"><div class="notice__emoji">📄</div>
+        <h3>Статья не найдена</h3><a href="blog.html" class="btn btn--primary" style="margin-top:14px;">Все статьи</a></div>`;
+    } else {
+      document.title = `${a.title} — Зелёный Дом`;
+      document.getElementById("crumb").textContent = a.title;
+      mount.innerHTML = `
+        <span class="article-card__tag">${a.tag}</span>
+        <h1 style="margin:14px 0 10px;">${a.title}</h1>
+        <div class="post__meta"><span>🗓 ${a.date}</span> · <span>⏱ 3 мин чтения</span></div>
+        <div class="post__cover">${imgTag(a.cover, a.title)}</div>
+        ${a.body.map(p => `<p>${p}</p>`).join("")}
+        <div class="cta-band" style="margin-top:36px;">
+          <h2>Готовы завести растение?</h2>
+          <p>Загляните в каталог — мы подскажем, что подойдёт именно вам.</p>
+          <a href="catalog.html" class="btn btn--light btn--lg">В каталог</a>
+        </div>`;
+
+      const more = ARTICLES.filter(x => x.id !== a.id);
+      document.getElementById("moreGrid").innerHTML = more.map(x => `
+        <a href="article.html?id=${x.id}" class="article-card">
+          <div class="article-card__media">${imgTag(x.cover, x.title)}</div>
+          <div class="article-card__body">
+            <span class="article-card__tag">${x.tag}</span>
+            <h3>${x.title}</h3>
+            <p>${x.excerpt}</p>
+            <span class="article-card__more">Читать →</span>
+          </div>
+        </a>`).join("");
+    }
+  </script>
+</body>
+</html>

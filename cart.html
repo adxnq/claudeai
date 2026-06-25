@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Корзина — Зелёный Дом</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="container">
+    <nav class="breadcrumbs">
+      <a href="index.html">Главная</a> / <span>Корзина</span>
+    </nav>
+  </div>
+
+  <section class="section section--tight">
+    <div class="container">
+      <h1 style="margin-bottom:24px;">Корзина</h1>
+      <div id="cartMount"></div>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    const FREE_DELIVERY = 3000;
+    const DELIVERY_COST = 350;
+
+    function render() {
+      const items = cartItems();
+      const mount = document.getElementById("cartMount");
+
+      if (items.length === 0) {
+        mount.innerHTML = `<div class="notice">
+          <div class="notice__emoji">🛒</div>
+          <h3>Корзина пуста</h3>
+          <p>Самое время выбрать зелёного друга.</p>
+          <a href="catalog.html" class="btn btn--primary" style="margin-top:16px;">Перейти в каталог</a>
+        </div>`;
+        return;
+      }
+
+      const subtotal = cartSubtotal();
+      const delivery = subtotal >= FREE_DELIVERY ? 0 : DELIVERY_COST;
+      const total = subtotal + delivery;
+
+      const rows = items.map(it => `
+        <div class="cart-item" data-id="${it.id}">
+          <a href="product.html?id=${it.id}"><div class="cart-item__img" style="position:relative;overflow:hidden;border-radius:12px;">${imgTag(it.img, it.name, "cart-item__img")}</div></a>
+          <div>
+            <div class="cart-item__name"><a href="product.html?id=${it.id}">${it.name}</a></div>
+            <div class="cart-item__latin">${it.latin}</div>
+            <div class="cart-item__controls">
+              <div class="qty qty--sm">
+                <button type="button" data-act="minus">−</button>
+                <input type="text" value="${it.qty}" readonly>
+                <button type="button" data-act="plus">+</button>
+              </div>
+              <button class="cart-item__remove" data-act="remove">✕ Удалить</button>
+            </div>
+          </div>
+          <div class="cart-item__price">${formatPrice(it.price * it.qty)}</div>
+        </div>
+      `).join("");
+
+      const deliveryNote = delivery === 0
+        ? `<span style="color:var(--green-600);">Бесплатно 🎉</span>`
+        : formatPrice(delivery);
+      const progress = subtotal < FREE_DELIVERY
+        ? `<p style="background:var(--green-50);padding:12px 14px;border-radius:10px;font-size:.88rem;color:var(--green-700);margin-bottom:14px;">
+            Добавьте товаров ещё на <b>${formatPrice(FREE_DELIVERY - subtotal)}</b> — и доставка станет бесплатной 🚚</p>`
+        : "";
+
+      mount.innerHTML = `
+        <div class="cart-layout">
+          <div>${rows}
+            <a href="catalog.html" class="btn btn--ghost" style="margin-top:8px;">← Продолжить покупки</a>
+          </div>
+          <aside class="summary">
+            <h3>Ваш заказ</h3>
+            ${progress}
+            <div class="summary__row"><span>Товары (${cartCount()} шт.)</span><span>${formatPrice(subtotal)}</span></div>
+            <div class="summary__row"><span>Доставка</span><span>${deliveryNote}</span></div>
+            <div class="promo">
+              <input type="text" placeholder="Промокод" id="promo">
+              <button class="btn btn--ghost" onclick="toast('Промокод не найден 😔')">OK</button>
+            </div>
+            <div class="summary__row summary__row--total"><span>Итого</span><span>${formatPrice(total)}</span></div>
+            <a href="checkout.html" class="btn btn--primary btn--block btn--lg" style="margin-top:16px;">Оформить заказ</a>
+          </aside>
+        </div>`;
+
+      mount.querySelectorAll(".cart-item").forEach(row => {
+        const id = row.dataset.id;
+        const cur = getCart()[id];
+        row.querySelector('[data-act="plus"]').onclick = () => { setQty(id, cur + 1); render(); };
+        row.querySelector('[data-act="minus"]').onclick = () => { setQty(id, cur - 1); render(); };
+        row.querySelector('[data-act="remove"]').onclick = () => { removeFromCart(id); render(); };
+      });
+    }
+    render();
+  </script>
+</body>
+</html>
