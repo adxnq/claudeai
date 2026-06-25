@@ -107,10 +107,11 @@ function renderHeader() {
       </a>
       <nav class="nav">${navHtml}</nav>
       <div class="header__actions">
+        <span class="header__city">📍 Москва</span>
         <a href="cart.html" class="icon-btn" aria-label="Корзина">
           🛒<span class="cart-count" data-cart-count data-count="0">0</span>
         </a>
-        <a href="catalog.html" class="btn btn--primary hide-sm">В каталог</a>
+        <a href="catalog.html" class="btn btn--green hide-sm">Каталог</a>
         <button class="burger" aria-label="Меню" onclick="toggleMobileNav()">☰</button>
       </div>
     </div>
